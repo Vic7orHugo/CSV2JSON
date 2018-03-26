@@ -18,9 +18,10 @@ let csvRows = []; 	// CSV rows array
 let jsonObjs = [];	// JSON objects array
 
 // Method to get the information from the CSV file 
-csv({noheader:true}).fromFile(filePath).on('csv', (csvRow) => {
+csv({noheader:true}).fromFile(filePath).on('csv', (csvRow) => { // noheader:true parameter so it gets the header line
 	csvRows.push(csvRow);			// Pushes each row to the CSV rows array
-}).on('done', () => { 				// Method to transform the CSV data to JSON data only after collection the information from the CSV file
+}).on('done', (error) => { 			// Method to transform the CSV data to JSON data only after collection the information from the CSV file
+	if (error) process.exit(1);
 	console.log(csvFile ,'read.');  // Prints that the file is read
 	let keys = csvRows[0]; 			// Saves the objects keys to another variable
 	csvRows.shift(); 				// Deletes the row containing the objects keys
@@ -36,7 +37,9 @@ csv({noheader:true}).fromFile(filePath).on('csv', (csvRow) => {
 	   Because of the parameter "null", the JSON string will keep the objects properties;
 	   The parameter "4" puts four empty spaces everytime it needs to "tab" the information
 	*/
-	const data = JSON.stringify(jsonObjs, null, 4); 
-	fs.writeFileSync(path.join(__dirname, jsonFile), (data)); 			// Writes the JSON prettified data to a JSON file
-	setTimeout(() => {console.log("Done writting on", jsonFile)}, 300);	// Logs an information on the console to inform the JSON file is ready assynchronously.
+	fs.writeFile(path.join(__dirname, jsonFile), JSON.stringify(jsonObjs, null, 4), (error) => { // Writes the JSON prettified data to a JSON file
+		if (error) process.exit(1);
+		console.log("Done writting on", jsonFile);
+		process.exit(0);
+	}); 			
 });
